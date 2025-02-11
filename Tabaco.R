@@ -147,4 +147,13 @@ tabla_inst <- tabla_menores %>%
   mutate(porcentaje = cantidad / sum(cantidad) * 100)
 tabla_inst <- tabla_inst %>%
   filter(humo_hogar == "1") %>%
-  select(instruccio
+  select(instruccion,  humo_hogar, cantidad, porcentaje)
+print(tabla_inst)
+
+
+##### Modelado ####
+#Pregunta 1: La exposicion al humo en menores de edad es la misma para todos los niveles educativos y socioeconomicos? 
+#Pregunta 2: El nivel educativo o la situacion socioeconomica tiene efecto sobre (% fuma en hogares- %fuma en hogares con menores)
+
+#Modelo nivel educativo y situacion socioeconomica como VE, provincia como VA?, VR= presencia ausencia de humo en hogares con menores de edad.
+
