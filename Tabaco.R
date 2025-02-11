@@ -37,8 +37,8 @@ ENFR$cant_menores18 <- ENFR$cant_componentes - ENFR$miembros_18
 Tabaco <- ENFR[, c("id","quintil_uc", "cant_componentes", "miembros_18","cant_menores18", "bita10_01", "bita02", "bita04", "nivel_instruccion_agrupado_j")]
 # Renombro columnas
 colnames(Tabaco)[colnames(Tabaco) %in% c("quintil_uc", "cant_componentes", "miembros_18","cant_menores18", "bita10_01", "bita02", "bita04", "nivel_instruccion_agrupado_j")] <- c("quintil_ing", "integrantes", "mayores18","menores18", "humo_hogar", "edad_primera", "fuma", "instruccion")
-
-
+Tabaco$quintil_ing<-as.factor(Tabaco$quintil_ing)
+Tabaco$instruccion<-as.factor(Tabaco$instruccion)
 # Verificamos las primeras filas del nuevo dataset
 head(Tabaco)
 
@@ -54,7 +54,7 @@ Tabaco <- subset(Tabaco, humo_hogar != 98) #saco casos en los que el entrevistad
 
 #CUANTOS DE LOS ENTREVISTADOS FUMAN?
 Tabaco$fuma_o_no <- ifelse(Tabaco$fuma %in% c(1, 2), "Fuma", "No Fuma")
-#library(dplyr)
+library(dplyr)
 # Calcular los porcentajes
 tabla_fuma <- Tabaco %>%
   group_by(fuma_o_no) %>%
@@ -156,4 +156,56 @@ print(tabla_inst)
 #Pregunta 2: El nivel educativo o la situacion socioeconomica tiene efecto sobre (% fuma en hogares- %fuma en hogares con menores)
 
 #Modelo nivel educativo y situacion socioeconomica como VE, provincia como VA?, VR= presencia ausencia de humo en hogares con menores de edad.
+#VR debe tener el exito=1 y el fracaso = 0 asiqe reasigno los valores de manera uqe las hogares sin humo=0
+tabla_menores$humo_hogar <- ifelse(tabla_menores$humo_hogar == 2, 0, tabla_menores$humo_hogar)
+# Plantear el modelo de regresión logística
+modelo <- glm(humo_hogar ~ quintil_ing+ instruccion, 
+              data = tabla_menores, 
+              family = binomial(link = "logit"))
+
+
+summary(modelo)
+
+#supuestos
+
+library(DHARMa)
+sim<-simulateResiduals(modelo,n=1000)
+testDispersion(sim)#no rechazo supuestos ! :)
+
+library(emmeans)
+em_means <- emmeans(modelo , ~ quintil_ing, type = "response") #### Hace las comparaciones
+confint(em_means)
+
+contrasts <- contrast(em_means, method = "pairwise")
+summary(contrasts)
+confint(contrasts)
+#### gráfico de comp.
+em_means_df <- as.data.frame(em_means) # dataset del emmeans anterior
+
+library(ggplot2)
+ggplot(em_means_df, aes(x = quintil_ing, y = prob, ymin = asymp.LCL, ymax = asymp.UCL)) +
+  geom_point(size = 3) +                       # Puntos para las medias marginales ajustadas
+  geom_errorbar(width = 0.2) +                 # Barras de error para los intervalos de confianza
+  theme_minimal()
+
+
+#### lo mismo pero con nivel de intruccion
+em_means <- emmeans(modelo , ~ instruccion, type = "response") #### Hace las comparaciones
+confint(em_means)
+
+contrasts <- contrast(em_means, method = "pairwise")
+summary(contrasts)
+confint(contrasts)
+
+#### gráfico de comp.
+em_means_df <- as.data.frame(em_means) # dataset del emmeans anterior
+
+ggplot(em_means_df, aes(x = instruccion, y = prob, ymin = asymp.LCL, ymax = asymp.UCL)) +
+  geom_point(size = 3) +                       # Puntos para las medias marginales ajustadas
+  geom_errorbar(width = 0.2) +                 # Barras de error para los intervalos de confianza
+  theme_minimal()
+
+
+
+
 
