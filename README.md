@@ -9,5 +9,7 @@ En este contexto, las desigualdades socioeconómicas pueden influir en la exposi
 A partir de los datos de la cuarta edición de la Encuesta Nacional de Factores de Riesgo (ENFR), se ajustó un modelo lineal generalizado (GLM) para analizar la relación entre el nivel socioeconómico y la exposición de menores de edad al humo de tabaco en el hogar. Las variables explicativas consideradas fueron el nivel de instrucción y el quintil de ingresos del hogar, mientras que la variable de respuesta fue la presencia o ausencia de humo de tabaco en espacios cerrados dentro del hogar, definida como una variable dicotómica. Por otro lado se evaluó si un mayor nivel socioeconómico y/o el nivel de instrucción del hogar se ven asociados una mayor conciencia en los efectos de exponer a los menores de edad al humo de cigarrillo.
 
 ### Resultados:
+El análisis realizado refleja que en el 22,5% de los hogares de argentina al menos un integrante fuma dentro del hogar, porcentaje que se mantiene independientemente de la presencia de menores de edad en su interior. Ahora bien el la probabilidad de que haya humo de tabaco en un hogar con menores aumenta un 55% cuando se trata de un hogar con bajo nivel educativo en comparación con un hogar con alto nivel de instrucción (jefe de hogar con nivel terciario completo). El nivel de ingresos tiene un efecto aún mayor presentando Odds ratio de 1,70. 
+Por otro lado se puede destacar que 
 
 ### Conclusiones:
