@@ -10,6 +10,7 @@ A partir de los datos de la cuarta edición de la Encuesta Nacional de Factores 
 
 ### Resultados:
 El análisis realizado refleja que en el 22,5% de los hogares de argentina al menos un integrante fuma dentro del hogar, porcentaje que se mantiene independientemente de la presencia de menores de edad en su interior. Ahora bien el la probabilidad de que haya humo de tabaco en un hogar con menores aumenta un 55% cuando se trata de un hogar con bajo nivel educativo en comparación con un hogar con alto nivel de instrucción (jefe de hogar con nivel terciario completo). El nivel de ingresos tiene un efecto aún mayor presentando Odds ratio de 1,70. 
-Por otro lado se puede destacar que 
+Por otro lado se puede destacar que a pesar de no detectarse diferencias significativas entre el porcentaje total de hogares con humo con y sin menores de edad si se registaraon disferencias entre grados de intruccion y nivel de ingreso, mientras % de hogares con humo en personas con alto nivel de instrucción es del 19,9% este valor disminuye en 2 puntos ante la presencia de menores de edad en el hogar.
 
 ### Conclusiones:
+Se detectaron efectos significativos del grado de instrucción y el nivel de ingresos del hogar en la exposición de menores de edad a humo de tabaco dentro de sus hogares. Siendo mayor el efecto del nivel economico. ….. hay una mayor precaución y tendencia a cambio de habitos en presencia de menores de edad en hogares con un mayor nivel socioeconomico.
