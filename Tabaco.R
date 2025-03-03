@@ -1,9 +1,11 @@
 install.packages("data.table")
 library(data.table)
 # Definir la ruta al archivo
-archivo <- "E:/Juli/ENFR 2018 - Base usuario.txt" 
+#archivo <- "E:/Juli/ENFR 2018 - Base usuario.txt" 
+archivo <-"C:/Users/maria/OneDrive/Documentos/GitHub/tabaquismo-en-infancias/ENFR 2018 - Base usuario.txt"
 # Cargar el archivo con el separador '|'
-ENFR <- fread(archivo, sep = "|", stringsAsFactors = FALSE)
+
+ENFR <- read.table (archivo, sep = "|", stringsAsFactors = FALSE, header=TRUE)
 
 # Ver las primeras filas para asegurarte de que se haya cargado correctamente
 head(ENFR)
@@ -151,12 +153,12 @@ tabla_inst <- tabla_inst %>%
 print(tabla_inst)
 
 
-##### Modelado ####
+##### Modelado 1####
 #Pregunta 1: La exposicion al humo en menores de edad es la misma para todos los niveles educativos y socioeconomicos? 
 #Pregunta 2: El nivel educativo o la situacion socioeconomica tiene efecto sobre (% fuma en hogares- %fuma en hogares con menores)
 
 #Modelo nivel educativo y situacion socioeconomica como VE, provincia como VA?, VR= presencia ausencia de humo en hogares con menores de edad.
-#VR debe tener el exito=1 y el fracaso = 0 asiqe reasigno los valores de manera uqe las hogares sin humo=0
+#VR debe tener el exito=1 y el fracaso = 0 asiqe reasigno los valores de manera uqe las hogares sin humo=0 (2= hay humo )
 tabla_menores$humo_hogar <- ifelse(tabla_menores$humo_hogar == 2, 0, tabla_menores$humo_hogar)
 # Plantear el modelo de regresión logística
 modelo <- glm(humo_hogar ~ quintil_ing+ instruccion, 
@@ -205,7 +207,78 @@ ggplot(em_means_df, aes(x = instruccion, y = prob, ymin = asymp.LCL, ymax = asym
   geom_errorbar(width = 0.2) +                 # Barras de error para los intervalos de confianza
   theme_minimal()
 
+                          #------------------------------------------
+#### Modelado 2 #########
+## Modelo con la variable con o sin menor de edad
+#definir una variables que sea con (1) o sin (0) menores de edad (menores18 != 0)
+Tabaco$menores <- ifelse(Tabaco$menores18 != 0, 1, 0)
+Tabaco$menores <- as.factor(Tabaco$menores)
+
+#Si=1 No=2 =>  VR debe tener el exito=1 y el fracaso = 0 asiqe reasigno los valores de manera uqe las hogares sin humo=0
+Tabaco$humo_hogar <- ifelse(Tabaco$humo_hogar == 2, 0, 1)
+Tabaco$humo_hogar <- as.factor(Tabaco$humo_hogar)
+Tabaco$instruccion <- as.factor (Tabaco$instruccion)
+
+modelo <- glm(humo_hogar ~ quintil_ing+ instruccion+ menores, 
+              data = Tabaco, 
+              family = binomial(link = "logit"))
 
 
+summary(modelo)
 
+#supuestos
+
+library(DHARMa)
+sim<-simulateResiduals(modelo,n=1000)
+testDispersion(sim)#no rechazo supuestos ! :)
+
+#install.packages("emmeans")
+library(emmeans)
+em_means <- emmeans(modelo , ~ quintil_ing, type = "response") #### Hace las comparaciones
+confint(em_means)  #quintil_ing1 / quintil_ing5      1.491 0.0722 Inf     1.306      1.70
+
+contrasts <- contrast(em_means, method = "pairwise")
+summary(contrasts)
+confint(contrasts)
+#### gráfico de comp.
+em_means_df <- as.data.frame(em_means) # dataset del emmeans anterior
+
+library(ggplot2)
+ggplot(em_means_df, aes(x = quintil_ing, y = prob, ymin = asymp.LCL, ymax = asymp.UCL)) +
+  geom_point(size = 3) +                       # Puntos para las medias marginales ajustadas
+  geom_errorbar(width = 0.2) +                 # Barras de error para los intervalos de confianza
+  theme_minimal()
+
+
+#### lo mismo pero con nivel de intruccion
+em_means <- emmeans(modelo , ~ instruccion, type = "response") #### Hace las comparaciones
+confint(em_means)
+
+contrasts <- contrast(em_means, method = "pairwise")
+summary(contrasts)
+confint(contrasts) #instruccion1 / instruccion3      1.146 0.0550 Inf     1.024      1.28
+
+#### gráfico de comp.
+em_means_df <- as.data.frame(em_means) # dataset del emmeans anterior
+
+ggplot(em_means_df, aes(x = instruccion, y = prob, ymin = asymp.LCL, ymax = asymp.UCL)) +
+  geom_point(size = 3) +                       # Puntos para las medias marginales ajustadas
+  geom_errorbar(width = 0.2) +                 # Barras de error para los intervalos de confianza
+  theme_minimal()
+
+#### lo mismo pero con o sin menore
+em_means <- emmeans(modelo , ~ menores, type = "response") #### Hace las comparaciones
+confint(em_means)
+
+contrasts <- contrast(em_means, method = "pairwise")
+summary(contrasts)
+confint(contrasts) # menores0 / menores1       1.09 0.0323 Inf      1.02      1.15
+
+#### gráfico de comp.
+em_means_df <- as.data.frame(em_means) # dataset del emmeans anterior
+
+ggplot(em_means_df, aes(x =menores, y = prob, ymin = asymp.LCL, ymax = asymp.UCL)) +
+  geom_point(size = 3) +                       # Puntos para las medias marginales ajustadas
+  geom_errorbar(width = 0.2) +                 # Barras de error para los intervalos de confianza
+  theme_minimal()
 
