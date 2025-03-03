@@ -1,0 +1,118 @@
+
+modelo <- glm(humo_hogar ~ quintil_ing*menores+ instruccion*menores + menores, 
+              data = Tabaco, 
+              family = binomial(link = "logit"))
+
+#### lo mismo pero con o sin menore en funcion del nivel educativo
+em_means <- emmeans(modelo , ~ menores| instruccion, type = "response") #### Hace las comparaciones
+
+contraste_menores <- pairs(em_means, adjust = "bonferroni") # Ajuste para múltiples comparaciones
+print(contrastes)
+
+em_contraste <- contrast(em_means, interaction = "pairwise", by = "instruccion")
+print(em_contraste)
+
+confint(contraste_menores)
+confint(em_contraste)
+> confint(em_contraste)
+instruccion = 1:
+ menores_pairwise odds.ratio     SE  df
+ 0 / 1                 0.831 0.0738 Inf
+ asymp.LCL asymp.UCL
+     0.698     0.989
+
+instruccion = 2:
+ menores_pairwise odds.ratio     SE  df
+ 0 / 1                 0.956 0.0463 Inf
+ asymp.LCL asymp.UCL
+     0.869     1.051
+
+instruccion = 3:
+ menores_pairwise odds.ratio     SE  df
+ 0 / 1                 1.328 0.0577 Inf
+ asymp.LCL asymp.UCL
+     1.220     1.446
+
+Estos resultados indican que el efecto de la presencia de menores sobre la probabilidad de tener humo en el hogar varía según el nivel de instrucción. Recordá que el contraste se expresa como el cociente de odds entre hogares sin menores (nivel "0") y hogares con menores (nivel "1"). Por ejemplo:
+
+Instrucción = 1:
+Un odds ratio de 0.831 (IC: 0.698–0.989) significa que, en hogares con instrucción 1, los hogares sin menores tienen un odds de tener humo en el hogar que es aproximadamente un 16,9% menor que el de los hogares con menores.
+(Interpretación: en este grupo, la presencia de menores se asocia con un mayor odds de presentar humo).
+
+Instrucción = 2:
+Un odds ratio de 0.956 (IC: 0.869–1.051) indica que en este grupo prácticamente no hay diferencia significativa entre hogares con y sin menores en cuanto al odds de tener humo.
+
+Instrucción = 3:
+Un odds ratio de 1.328 (IC: 1.220–1.446) significa que, en hogares con instrucción 3, los hogares sin menores tienen un odds de tener humo en el hogar que es un 32,8% mayor que el de los hogares con menores.
+(Interpretación: en este grupo, la presencia de menores se asocia con una menor probabilidad de tener humo).
+
+Estos contrastes se promedian sobre los niveles de quintil de ingresos (ya que los resultados se indican "averaged over the levels of: quintil_ing"). Es decir, al mantener constante el nivel de ingresos, el efecto del factor "menores" difiere según el nivel de instrucción.
+
+En resumen, en hogares con menor instrucción (nivel 1) la presencia de menores se relaciona con un mayor riesgo de humo en el hogar, mientras que en hogares con mayor instrucción (nivel 3) la presencia de menores se asocia con una reducción del riesgo (o, visto desde el contraste, los hogares sin menores tienen mayor odds de humo). En el grupo intermedio (instrucción 2) no se observa una diferencia relevante.
+
+
+Si comparamos directamente el efecto (medido en la escala de log-odds), la diferencia entre instruct 3 e instruct 1 es:
+
+1.328/0.831≈ 1.60
+
+Esto se puede interpretar como que, en promedio, los hogares (o las personas responsables de ellos) con un alto nivel educativo (instrucción 3) son aproximadamente 1.6 veces más conscientes (es decir, muestran una mayor reducción en la presencia de humo en el hogar cuando hay menores) en comparación con aquellos de bajo nivel educativo (instrucción 1).
+
+Esta interpretación asume que la “conciencia” se refleja en la adopción de conductas que reducen la exposición de los menores al humo de tabaco. ¿Te gustaría profundizar en la interpretación o ajustar el análisis de alguna forma?
+
+El cociente de los OR (nivel de instrucción 3 frente a nivel 1) es aproximadamente 1.60, con un intervalo de confianza del 95%: [1.32, 1.94].
+
+
+
+
+> confint(em_contraste)
+quintil_ing = 1:
+ menores_pairwise odds.ratio     SE  df asymp.LCL asymp.UCL
+ 0 / 1                 0.999 0.0616 Inf     0.885      1.13
+
+quintil_ing = 2:
+ menores_pairwise odds.ratio     SE  df asymp.LCL asymp.UCL
+ 0 / 1                 0.954 0.0612 Inf     0.841      1.08
+
+quintil_ing = 3:
+ menores_pairwise odds.ratio     SE  df asymp.LCL asymp.UCL
+ 0 / 1                 0.911 0.0631 Inf     0.795      1.04
+
+quintil_ing = 4:
+ menores_pairwise odds.ratio     SE  df asymp.LCL asymp.UCL
+ 0 / 1                 1.063 0.0827 Inf     0.913      1.24
+
+quintil_ing = 5:
+ menores_pairwise odds.ratio     SE  df asymp.LCL asymp.UCL
+ 0 / 1                 1.185 0.1050 Inf     0.995      1.41
+
+Results are averaged over the levels of: instruccion 
+Confidence level used: 0.95 
+Intervals are back-transformed from the log odds ratio scale
+
+Estos resultados indican el contraste (odds ratio) entre hogares sin menores (nivel 0) y con menores (nivel 1) para la presencia de humo en el hogar, pero diferenciados por cada quintil de ingreso (variable *quintil_ing*), promediados sobre los niveles de *instruccion*.
+
+- **Quintil 1:** odds ratio ≈ 1 (0.999, CI: 0.885–1.13)  
+  Esto sugiere que, en el primer quintil, no hay diferencia en las probabilidades de tener humo en el hogar entre hogares sin y con menores.
+
+- **Quintil 2:** odds ratio ≈ 0.954 (CI: 0.841–1.08)  
+  Aquí, los hogares sin menores tienen aproximadamente un 4.6% menor odds de tener humo en el hogar en comparación con los hogares con menores, aunque el intervalo incluye 1.
+
+- **Quintil 3:** odds ratio ≈ 0.911 (CI: 0.795–1.04)  
+  En este quintil, la diferencia es algo mayor (alrededor de un 9% menor odds en hogares sin menores), pero nuevamente el intervalo incluye 1.
+
+- **Quintil 4:** odds ratio ≈ 1.063 (CI: 0.913–1.24)  
+  Aquí se observa una tendencia a que los hogares sin menores tengan un 6.3% mayor odds de tener humo, pero la diferencia no es concluyente (CI incluye 1).
+
+- **Quintil 5:** odds ratio ≈ 1.185 (CI: 0.995–1.41)  
+  En el quintil más alto, los hogares sin menores presentan un 18.5% mayor odds de tener humo en el hogar en comparación con los hogares con menores. La cota inferior del intervalo (0.995) es casi 1, lo que sugiere que este efecto es marginalmente significativo.
+
+**Interpretación global:**  
+En este modelo (con interacciones de *quintil_ing* con *menores*), se observa que el efecto de la presencia de menores varía según el quintil de ingresos. En los quintiles más bajos y medios (1, 2 y 3) la diferencia es mínima o incluso tiende a ser que los hogares con menores tengan odds ligeramente mayores de presentar humo. En cambio, en los quintiles superiores (4 y especialmente 5), los hogares sin menores tienen odds más altas de tener humo, lo que podría interpretarse como que, en hogares de mayor ingreso, la presencia de menores está asociada a una conducta más cuidadosa respecto al tabaco en el hogar.
+
+Para comparar el efecto en quintil 5 versus quintil 1, calculo el cociente:
+Cociente= 
+0.831/1.185 ≈1.43
+
+Esto significa que, en promedio, el efecto del factor “menores” (la diferencia entre hogares sin y con menores) es aproximadamente 1.43 veces mayor en quintil 5 que en quintil 1.
+
+El cociente de los OR (quintil 5 frente a quintil 1) es aproximadamente 1.43 con un intervalo de confianza del 95% de [1.12, 1.82].

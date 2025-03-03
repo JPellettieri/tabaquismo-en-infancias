@@ -208,6 +208,11 @@ ggplot(em_means_df, aes(x = instruccion, y = prob, ymin = asymp.LCL, ymax = asym
   theme_minimal()
 
                           #------------------------------------------
+#Los datos estan balanceados?
+table(Tabaco$quintil_ing, Tabaco$humo_hogar)
+table(Tabaco$instruccion, Tabaco$humo_hogar)
+
+
 #### Modelado 2 #########
 ## Modelo con la variable con o sin menor de edad
 #definir una variables que sea con (1) o sin (0) menores de edad (menores18 != 0)
@@ -219,12 +224,14 @@ Tabaco$humo_hogar <- ifelse(Tabaco$humo_hogar == 2, 0, 1)
 Tabaco$humo_hogar <- as.factor(Tabaco$humo_hogar)
 Tabaco$instruccion <- as.factor (Tabaco$instruccion)
 
-modelo <- glm(humo_hogar ~ quintil_ing+ instruccion+ menores, 
+modelo <- glm(humo_hogar ~ quintil_ing*menores+ instruccion*menores + menores, 
               data = Tabaco, 
               family = binomial(link = "logit"))
 
 
 summary(modelo)
+
+print(Tabaco)
 
 #supuestos
 
@@ -254,11 +261,13 @@ ggplot(em_means_df, aes(x = quintil_ing, y = prob, ymin = asymp.LCL, ymax = asym
 em_means <- emmeans(modelo , ~ instruccion, type = "response") #### Hace las comparaciones
 confint(em_means)
 
+
 contrasts <- contrast(em_means, method = "pairwise")
 summary(contrasts)
 confint(contrasts) #instruccion1 / instruccion3      1.146 0.0550 Inf     1.024      1.28
 
 #### gráfico de comp.
+
 em_means_df <- as.data.frame(em_means) # dataset del emmeans anterior
 
 ggplot(em_means_df, aes(x = instruccion, y = prob, ymin = asymp.LCL, ymax = asymp.UCL)) +
@@ -282,3 +291,27 @@ ggplot(em_means_df, aes(x =menores, y = prob, ymin = asymp.LCL, ymax = asymp.UCL
   geom_errorbar(width = 0.2) +                 # Barras de error para los intervalos de confianza
   theme_minimal()
 
+
+#### lo mismo pero con o sin menore en funcion del nivel educativo
+em_means <- emmeans(modelo , ~ menores| instruccion, type = "response") #### Hace las comparaciones
+
+contraste_menores <- pairs(em_means, adjust = "bonferroni") # Ajuste para múltiples comparaciones
+print(contrastes)
+
+em_contraste <- contrast(em_means, interaction = "pairwise", by = "instruccion")
+print(em_contraste)
+
+confint(contraste_menores)
+confint(em_contraste)
+
+#### lo mismo pero con o sin menore en funcion de los ingresos
+em_means_ing <- emmeans(modelo , ~ menores| quintil_ing, type = "response") #### Hace las comparaciones
+
+contraste_menores <- pairs(em_means_ing, adjust = "bonferroni") # Ajuste para múltiples comparaciones
+print(contraste_menores)
+
+em_contraste <- contrast(em_means_ing, interaction = "pairwise", by = "quintil_ing")
+print(em_contraste)
+
+confint(contraste_menores)
+confint(em_contraste)
